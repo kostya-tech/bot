@@ -91,9 +91,16 @@ async function generateResponse(state: typeof StateAnnotation.State) {
                 };
 
             case "waiting_for_name":
-                // Analyze user intent to extract name
-                console.log("🔍 [RAG DEBUG] About to analyze intent for message:", userMessage);
-                const intent = await llmService.analyzeUserIntent(userMessage);
+                // Always use contextual analysis for best accuracy
+                console.log("🧠 [CONTEXT] Using contextual analysis for name extraction");
+
+                const intent = await llmService.analyzeUserIntentWithContext(
+                    userMessage,
+                    state.conversationHistory || [],
+                    conversationStage,
+                    userName
+                );
+
                 console.log("📋 [RAG DEBUG] Intent analysis result:", intent);
 
                 if (intent.extractedName) {
@@ -104,7 +111,10 @@ async function generateResponse(state: typeof StateAnnotation.State) {
                         conversationStage: "asking_for_joke"
                     };
                 } else {
-                    response = "Вибач, не зрозумів твоє ім'я. Можеш повторити? 😊";
+                    response = `Вибач, не зрозумів твоє ім'я 😅 Можеш написати його чіткіше? Наприклад: "Мене звуть Олексій" або просто "Олексій"`;
+
+                    console.log("🔄 [NAME] Could not extract name, asking for clarification");
+
                     return {
                         messages: [new AIMessage(response)]
                     };
@@ -112,7 +122,17 @@ async function generateResponse(state: typeof StateAnnotation.State) {
 
             case "asking_for_joke":
             case "asking_for_more":
-                console.log("🔍 [RAG DEBUG] Analyzing user intent for:", userMessage); const userIntent = await llmService.analyzeUserIntent(userMessage); console.log("📋 [RAG DEBUG] User intent result:", userIntent);
+                // Always use contextual analysis for best accuracy
+                console.log("🧠 [CONTEXT] Using contextual analysis for joke intent");
+
+                const userIntent = await llmService.analyzeUserIntentWithContext(
+                    userMessage,
+                    state.conversationHistory || [],
+                    conversationStage,
+                    userName
+                );
+
+                console.log("📋 [RAG DEBUG] User intent result:", userIntent);
 
                 if (userIntent.intent === "want_joke") {
                     if (retrievedJokes.length > 0) {
@@ -150,7 +170,10 @@ async function generateResponse(state: typeof StateAnnotation.State) {
                         conversationStage: "conversation_ended"
                     };
                 } else {
-                    response = "Не зрозумів 🤔 Хочеш жарт? Відповідай 'так' або 'ні' 😊";
+                    response = `Вибач, не зрозумів 😅 Скажи просто "так" якщо хочеш жарт, або "ні" якщо не хочеш. Можеш також написати "давай жарт" або "досить"`;
+
+                    console.log("🔄 [JOKE] Could not understand intent, asking for clarification");
+
                     return {
                         messages: [new AIMessage(response)]
                     };

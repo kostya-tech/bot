@@ -130,7 +130,84 @@ export class LLMService {
     }
 
     /**
-     * Analyze user intent from their message
+     * Analyze user intent with conversation context
+     */
+    async analyzeUserIntentWithContext(
+        userMessage: string,
+        conversationHistory: string[],
+        conversationStage: string,
+        userName?: string
+    ): Promise<{
+        intent: 'want_joke' | 'dont_want_joke' | 'greeting' | 'farewell' | 'provide_name' | 'unclear';
+        confidence: number;
+        extractedName?: string;
+        reasoning?: string;
+    }> {
+        const contextString = conversationHistory.length > 0
+            ? conversationHistory.slice(-5).join('\n- ') // Last 5 messages
+            : "Немає попередньої історії";
+
+        const prompt = PromptTemplate.fromTemplate(`
+Проаналізуй повідомлення користувача з урахуванням контексту розмови.
+
+ПОТОЧНЕ ПОВІДОМЛЕННЯ: "{userMessage}"
+
+КОНТЕКСТ РОЗМОВИ:
+- Етап: {conversationStage}
+- Ім'я користувача: {userName}
+- Історія останніх повідомлень:
+{contextString}
+
+Можливі наміри:
+- want_joke: хоче жарт (так, давай, хочу, ще один)
+- dont_want_joke: не хоче жарт (ні, досить, стоп)
+- greeting: вітається (привіт, hello, добрий день)
+- farewell: прощається (до побачення, бувай)
+- provide_name: надає ім'я (мене звуть, я, моє ім'я)
+- unclear: незрозуміло
+
+ВАЖЛИВО: Відповідай ТІЛЬКИ чистим JSON без markdown блоків!
+
+Формат відповіді:
+{{
+  "intent": "намір",
+  "confidence": 0.95,
+  "extractedName": "ім'я або null",
+  "reasoning": "коротке пояснення чому такий намір"
+}}
+`);
+
+        console.log("🎯 [DEBUG] Analyzing intent with context for:", userMessage);
+        const formattedPrompt = await prompt.format({
+            userMessage,
+            contextString,
+            conversationStage,
+            userName: userName || "невідоме"
+        });
+        const response = await this.llm.invoke(formattedPrompt);
+        console.log("📊 [DEBUG] Contextual analysis response:", response.content);
+
+        try {
+            let cleanResponse = response.content as string;
+            cleanResponse = cleanResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+
+            console.log("🧹 [DEBUG] Cleaned contextual response:", cleanResponse);
+            const parsed = JSON.parse(cleanResponse);
+            console.log("✅ [DEBUG] Parsed contextual intent:", parsed);
+            return parsed;
+        } catch (error) {
+            console.error("❌ Failed to parse contextual LLM response:", error);
+            console.error("📄 Raw response:", response.content);
+            return {
+                intent: 'unclear',
+                confidence: 0.3,
+                reasoning: "Помилка парсингу відповіді"
+            };
+        }
+    }
+
+    /**
+     * Analyze user intent from their message (simple version)
      */
     async analyzeUserIntent(userMessage: string): Promise<{
         intent: 'want_joke' | 'dont_want_joke' | 'greeting' | 'farewell' | 'provide_name' | 'unclear';
