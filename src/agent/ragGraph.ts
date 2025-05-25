@@ -34,7 +34,7 @@ async function retrieveContext(state: typeof StateAnnotation.State) {
 
     try {
         // Perform semantic search
-        let retrievedJokes = await vectorStore.searchJokes(userQuery, {
+        console.log("🔍 [VECTOR DEBUG] Searching for jokes with query:", userQuery); let retrievedJokes = await vectorStore.searchJokes(userQuery, {
             k: 3,
             scoreThreshold: 0.6
         });
@@ -92,7 +92,9 @@ async function generateResponse(state: typeof StateAnnotation.State) {
 
             case "waiting_for_name":
                 // Analyze user intent to extract name
+                console.log("🔍 [RAG DEBUG] About to analyze intent for message:", userMessage);
                 const intent = await llmService.analyzeUserIntent(userMessage);
+                console.log("📋 [RAG DEBUG] Intent analysis result:", intent);
 
                 if (intent.extractedName) {
                     const greeting = await llmService.generateGreeting(intent.extractedName);
@@ -110,7 +112,7 @@ async function generateResponse(state: typeof StateAnnotation.State) {
 
             case "asking_for_joke":
             case "asking_for_more":
-                const userIntent = await llmService.analyzeUserIntent(userMessage);
+                console.log("🔍 [RAG DEBUG] Analyzing user intent for:", userMessage); const userIntent = await llmService.analyzeUserIntent(userMessage); console.log("📋 [RAG DEBUG] User intent result:", userIntent);
 
                 if (userIntent.intent === "want_joke") {
                     if (retrievedJokes.length > 0) {

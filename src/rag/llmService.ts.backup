@@ -61,7 +61,6 @@ export class LLMService {
         });
 
         const response = await this.llm.invoke(formattedPrompt);
-        console.log("📊 [DEBUG] Raw LLM response:", response.content);
         return response.content as string;
     }
 
@@ -69,39 +68,24 @@ export class LLMService {
      * Generate a greeting response
      */
     async generateGreeting(userName?: string): Promise<string> {
-        console.log("🎯 [DEBUG] Generating greeting for:", userName || "unknown user");
+        const prompt = PromptTemplate.fromTemplate(`
+Ти - дружелюбний бот-жартівник. Привітайся з користувачем українською мовою.
 
-        if (userName) {
-            // User name is known - personalized greeting
-            const prompt = PromptTemplate.fromTemplate(`
-Ти - дружелюбний бот-жартівник. Користувача звуть {userName}.
+{userContext}
 
-Привітайся персонально з {userName}, скажи що радий знайомству та запропонуй розповісти жарт.
-Використай українську мову та емодзі.
+Зроби привітання коротким, дружелюбним та запитай як користувача звуть (якщо ім'я невідоме).
+Додай емодзі.
 
 ВІДПОВІДЬ:
 `);
 
-            const formattedPrompt = await prompt.format({ userName });
-            const response = await this.llm.invoke(formattedPrompt);
-            console.log("📊 [DEBUG] Personalized greeting response:", response.content);
-            return response.content as string;
-        } else {
-            // User name is unknown - ask for name
-            const prompt = PromptTemplate.fromTemplate(`
-Ти - дружелюбний бот-жартівник. Ім'я користувача невідоме.
+        const userContext = userName
+            ? `Користувача звуть: ${userName}`
+            : "Ім'я користувача невідоме";
 
-Привітайся дружелюбно та запитай як користувача звуть.
-Використай українську мову та емодзі.
-
-ВІДПОВІДЬ:
-`);
-
-            const formattedPrompt = await prompt.format({});
-            const response = await this.llm.invoke(formattedPrompt);
-            console.log("📊 [DEBUG] Name request response:", response.content);
-            return response.content as string;
-        }
+        const formattedPrompt = await prompt.format({ userContext });
+        const response = await this.llm.invoke(formattedPrompt);
+        return response.content as string;
     }
 
     /**
@@ -125,7 +109,7 @@ export class LLMService {
             jokesCount: jokesCount.toString()
         });
 
-        const response = await this.llm.invoke(formattedPrompt); console.log("📊 [DEBUG] Raw LLM response:", response.content);
+        const response = await this.llm.invoke(formattedPrompt);
         return response.content as string;
     }
 
@@ -152,9 +136,7 @@ export class LLMService {
 
 Якщо користувач надає ім'я, витягни його.
 
-ВАЖЛИВО: Відповідай ТІЛЬКИ чистим JSON без markdown блоків!
-
-Формат відповіді:
+Відповідь у форматі JSON:
 {{
   "intent": "намір",
   "confidence": 0.95,
@@ -162,23 +144,14 @@ export class LLMService {
 }}
 `);
 
-        console.log("🎯 [DEBUG] Analyzing intent for:", userMessage);
         const formattedPrompt = await prompt.format({ userMessage });
         const response = await this.llm.invoke(formattedPrompt);
-        console.log("📊 [DEBUG] Raw LLM response:", response.content);
 
         try {
-            // Clean the response from markdown code blocks
-            let cleanResponse = response.content as string;
-            cleanResponse = cleanResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-
-            console.log("🧹 [DEBUG] Cleaned response:", cleanResponse);
-            const parsed = JSON.parse(cleanResponse);
-            console.log("✅ [DEBUG] Parsed intent:", parsed);
+            const parsed = JSON.parse(response.content as string);
             return parsed;
         } catch (error) {
-            console.error("❌ Failed to parse LLM response:", error);
-            console.error("📄 Raw response:", response.content);
+            console.error("Failed to parse LLM response:", error);
             return {
                 intent: 'unclear',
                 confidence: 0.5
@@ -201,7 +174,7 @@ export class LLMService {
 `);
 
         const formattedPrompt = await prompt.format({ userName, userQuery });
-        const response = await this.llm.invoke(formattedPrompt); console.log("📊 [DEBUG] Raw LLM response:", response.content);
+        const response = await this.llm.invoke(formattedPrompt);
         return response.content as string;
     }
 } 
