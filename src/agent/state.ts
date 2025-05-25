@@ -72,11 +72,30 @@ export const StateAnnotation = Annotation.Root({
   jokesCount: Annotation<number>,
 
   /**
-   * Feel free to add additional attributes to your state as needed.
-   * Common examples include retrieved documents, extracted entities, API connections, etc.
-   *
-   * For simple fields whose value should be overwritten by the return value of a node,
-   * you don't need to define a reducer or default.
+   * RAG-specific fields for enhanced conversation
    */
-  // additionalField: Annotation<string>,
+
+  /**
+   * Last user query for context retrieval
+   */
+  lastUserQuery: Annotation<string>,
+
+  /**
+   * Retrieved context from vector store
+   */
+  retrievedContext: Annotation<any[]>,
+
+  /**
+   * User preferences learned over time
+   */
+  userPreferences: Annotation<{
+    preferredJokeCategory?: string;
+    preferredDifficulty?: "easy" | "medium" | "hard";
+    topics?: string[];
+  }>,
+
+  /**
+   * Conversation history for context
+   */
+  conversationHistory: Annotation<string[]>,
 });

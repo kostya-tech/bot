@@ -20,7 +20,10 @@
     "test:graph": "npm run build && node test_graph.js",
     "test:interactive": "npm run build && node interactive_test.js",
     "demo:joke": "npm run build && node joke_bot_demo.js",
+    "demo:rag": "npm run build && node rag_demo.js",
     "test:quick": "npm run build && node quick_test.js",
+    "rag:init": "npm run build && node -e \"import('./dist/rag/vectorStore.js').then(m => new m.JokesVectorStore().initialize())\"",
+    "rag:test": "npm run build && node -e \"import('./dist/rag/vectorStore.js').then(m => { const vs = new m.JokesVectorStore(); vs.initialize().then(() => vs.searchJokes('комп\\'ютер')).then(console.log); })\"",
     "format": "prettier --write .",
     "lint": "eslint src",
     "format:check": "prettier --check .",
@@ -30,7 +33,11 @@
   },
   "dependencies": {
     "@langchain/core": "^0.3.37",
-    "@langchain/langgraph": "^0.2.43"
+    "@langchain/langgraph": "^0.2.43",
+    "@langchain/openai": "^0.3.0",
+    "@langchain/community": "^0.3.0",
+    "faiss-node": "^0.5.1",
+    "openai": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
