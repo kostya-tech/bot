@@ -14,7 +14,8 @@
     "studio": "open https://smith.langchain.com/studio?baseUrl=http://localhost:2024",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "check-jokes": "node -e \"console.log('✅ JSON валідний:', JSON.parse(require('fs').readFileSync('data/jokes.json', 'utf8')).length, 'жартів')\""
   },
   "dependencies": {
     "@langchain/core": "^0.3.37",

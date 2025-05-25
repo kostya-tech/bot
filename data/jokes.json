@@ -1,0 +1,161 @@
+[
+    {
+        "content": "Чому програмісти не люблять природу? Тому що там забагато багів! 🐛",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "easy",
+            "tags": [
+                "bugs",
+                "nature",
+                "programming"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Що сказав один байт іншому? Нічого, вони просто обмінялися бітами! 💾",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "medium",
+            "tags": [
+                "bytes",
+                "bits",
+                "communication"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Чому комп'ютери ніколи не хворіють? Тому що у них є антивірус! 🦠",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "easy",
+            "tags": [
+                "computers",
+                "antivirus",
+                "health"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Як називається програміст, який не п'є каву? Неробочий! ☕",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "easy",
+            "tags": [
+                "coffee",
+                "programmer",
+                "work"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Чому JavaScript розлучився з HTML? Тому що вони не могли знайти спільний DOM! 🌐",
+        "metadata": {
+            "category": "web-development",
+            "difficulty": "hard",
+            "tags": [
+                "javascript",
+                "html",
+                "dom",
+                "relationships"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Що робить програміст, коли не може заснути? Рахує овець в циклі while! 🐑",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "medium",
+            "tags": [
+                "sleep",
+                "loops",
+                "while",
+                "sheep"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Чому програмісти плутають Різдво з Хеловіном? Тому що Oct 31 = Dec 25! 🎃🎄",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "hard",
+            "tags": [
+                "octal",
+                "decimal",
+                "holidays",
+                "math"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Скільки програмістів потрібно, щоб замінити лампочку? Жодного, це апаратна проблема!",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "medium",
+            "tags": [
+                "hardware",
+                "software",
+                "lightbulb"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Що таке рекурсія? Щоб зрозуміти рекурсію, спочатку треба зрозуміти рекурсію.",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "medium",
+            "tags": [
+                "recursion",
+                "definition",
+                "loop"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Чому дизайнери завжди холодні? Тому що вони залишають вікна відкритими! 🪟",
+        "metadata": {
+            "category": "design",
+            "difficulty": "easy",
+            "tags": [
+                "design",
+                "windows",
+                "cold"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Що спільного між програмістом та магом? Обидва створюють щось з нічого! ✨",
+        "metadata": {
+            "category": "programming",
+            "difficulty": "easy",
+            "tags": [
+                "magic",
+                "creation",
+                "programming"
+            ],
+            "language": "ukrainian"
+        }
+    },
+    {
+        "content": "Чому тестувальники завжди песимісти? Тому що їхня робота - знаходити проблеми! 🐞",
+        "metadata": {
+            "category": "testing",
+            "difficulty": "medium",
+            "tags": [
+                "testing",
+                "bugs",
+                "pessimism"
+            ],
+            "language": "ukrainian"
+        }
+    }
+]

@@ -1,101 +1,54 @@
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { FaissStore } from "@langchain/community/vectorstores/faiss";
 import { Document } from "@langchain/core/documents";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
-// Extended joke database with metadata for better RAG
-const JOKES_DATABASE = [
-    {
-        content: "Чому програмісти не люблять природу? Тому що там забагато багів! 🐛",
-        metadata: {
-            category: "programming",
-            difficulty: "easy",
-            tags: ["bugs", "nature", "programming"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Що сказав один байт іншому? Нічого, вони просто обмінялися бітами! 💾",
-        metadata: {
-            category: "programming",
-            difficulty: "medium",
-            tags: ["bytes", "bits", "communication"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Чому комп'ютери ніколи не хворіють? Тому що у них є антивірус! 🦠",
-        metadata: {
-            category: "programming",
-            difficulty: "easy",
-            tags: ["computers", "antivirus", "health"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Як називається програміст, який не п'є каву? Неробочий! ☕",
-        metadata: {
-            category: "programming",
-            difficulty: "easy",
-            tags: ["coffee", "programmer", "work"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Чому JavaScript розлучився з HTML? Тому що вони не могли знайти спільний DOM! 🌐",
-        metadata: {
-            category: "web-development",
-            difficulty: "hard",
-            tags: ["javascript", "html", "dom", "relationships"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Що робить програміст, коли не може заснути? Рахує овець в циклі while! 🐑",
-        metadata: {
-            category: "programming",
-            difficulty: "medium",
-            tags: ["sleep", "loops", "while", "sheep"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Чому програмісти плутають Різдво з Хеловіном? Тому що Oct 31 = Dec 25! 🎃🎄",
-        metadata: {
-            category: "programming",
-            difficulty: "hard",
-            tags: ["octal", "decimal", "holidays", "math"],
-            language: "ukrainian"
-        }
-    },
-    // Additional jokes for better RAG demonstration
-    {
-        content: "Скільки програмістів потрібно, щоб замінити лампочку? Жодного, це апаратна проблема!",
-        metadata: {
-            category: "programming",
-            difficulty: "medium",
-            tags: ["hardware", "software", "lightbulb"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Чому програмісти завжди плутають Різдво з Хеловіном? Тому що Oct 31 == Dec 25!",
-        metadata: {
-            category: "programming",
-            difficulty: "hard",
-            tags: ["octal", "decimal", "comparison"],
-            language: "ukrainian"
-        }
-    },
-    {
-        content: "Що таке рекурсія? Щоб зрозуміти рекурсію, спочатку треба зрозуміти рекурсію.",
-        metadata: {
-            category: "programming",
-            difficulty: "medium",
-            tags: ["recursion", "definition", "loop"],
-            language: "ukrainian"
-        }
+// Get current file directory for relative path resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+/**
+ * Load jokes from external JSON file
+ */
+function loadJokesFromFile(): any[] {
+    try {
+        const jokesPath = join(__dirname, "../../data/jokes.json");
+        const jokesData = readFileSync(jokesPath, "utf-8");
+        const jokes = JSON.parse(jokesData);
+        console.log(`📚 Loaded ${jokes.length} jokes from ${jokesPath}`);
+        return jokes;
+    } catch (error) {
+        console.error("❌ Error loading jokes from file:", error);
+        console.log("🔄 Falling back to default jokes...");
+
+        // Fallback to default jokes if file not found
+        return [
+            {
+                content: "Чому програмісти не люблять природу? Тому що там забагато багів! 🐛",
+                metadata: {
+                    category: "programming",
+                    difficulty: "easy",
+                    tags: ["bugs", "nature", "programming"],
+                    language: "ukrainian"
+                }
+            },
+            {
+                content: "Що сказав один байт іншому? Нічого, вони просто обмінялися бітами! 💾",
+                metadata: {
+                    category: "programming",
+                    difficulty: "medium",
+                    tags: ["bytes", "bits", "communication"],
+                    language: "ukrainian"
+                }
+            }
+        ];
     }
-];
+}
+
+// Load jokes database from external JSON file
+const JOKES_DATABASE = loadJokesFromFile();
 
 export class JokesVectorStore {
     private vectorStore: FaissStore | null = null;
@@ -222,5 +175,36 @@ export class JokesVectorStore {
     async load(directory: string): Promise<void> {
         this.vectorStore = await FaissStore.load(directory, this.embeddings);
         console.log(`📂 Vector store loaded from ${directory}`);
+    }
+
+    /**
+     * Reload jokes from JSON file and reinitialize vector store
+     */
+    async reloadJokes(): Promise<void> {
+        console.log("🔄 Reloading jokes from JSON file...");
+
+        // Reload jokes from file
+        const newJokes = loadJokesFromFile();
+
+        // Convert to documents
+        const documents = newJokes.map((joke: any) => new Document({
+            pageContent: joke.content,
+            metadata: joke.metadata
+        }));
+
+        // Recreate vector store
+        this.vectorStore = await FaissStore.fromDocuments(
+            documents,
+            this.embeddings
+        );
+
+        console.log(`✅ Vector store reloaded with ${documents.length} jokes`);
+    }
+
+    /**
+     * Get current jokes count
+     */
+    getJokesCount(): number {
+        return JOKES_DATABASE.length;
     }
 } 
