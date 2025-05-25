@@ -19,6 +19,8 @@
     "test:int": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=\\.int\\.test\\.ts$",
     "test:graph": "npm run build && node test_graph.js",
     "test:interactive": "npm run build && node interactive_test.js",
+    "demo:joke": "npm run build && node joke_bot_demo.js",
+    "test:quick": "npm run build && node quick_test.js",
     "format": "prettier --write .",
     "lint": "eslint src",
     "format:check": "prettier --check .",

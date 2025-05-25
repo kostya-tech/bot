@@ -15,6 +15,12 @@ npm run studio
 ## Тестування
 
 ```bash
+# Швидкий тест жарт-бота (рекомендований)
+npm run test:quick
+
+# Повна демонстрація сценарію
+npm run demo:joke
+
 # Швидкий тест графа
 npm run test:graph
 

@@ -48,6 +48,29 @@ export const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+
+  /**
+   * Conversation stage tracking for joke bot scenario
+   * Possible values:
+   * - "greeting" - initial state, bot asks for user's name
+   * - "waiting_for_name" - bot asked for name, waiting for user's name
+   * - "asking_for_joke" - bot greeted user, asking if they want a joke
+   * - "telling_jokes" - active joke telling mode
+   * - "asking_for_more" - bot asked if user wants another joke
+   * - "conversation_ended" - user said no, conversation finished
+   */
+  conversationStage: Annotation<string>,
+
+  /**
+   * User's name for personalized conversation
+   */
+  userName: Annotation<string>,
+
+  /**
+   * Counter for jokes told to avoid repetition
+   */
+  jokesCount: Annotation<number>,
+
   /**
    * Feel free to add additional attributes to your state as needed.
    * Common examples include retrieved documents, extracted entities, API connections, etc.
