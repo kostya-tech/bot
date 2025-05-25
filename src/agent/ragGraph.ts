@@ -1,5 +1,5 @@
 import { StateGraph, END } from "@langchain/langgraph";
-import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { AIMessage } from "@langchain/core/messages";
 import { StateAnnotation } from "./state.js";
 import { JokesVectorStore } from "../rag/vectorStore.js";
 import { LLMService } from "../rag/llmService.js";
@@ -25,7 +25,7 @@ async function retrieveContext(state: typeof StateAnnotation.State) {
     await ensureVectorStoreInitialized();
 
     const lastMessage = state.messages[state.messages.length - 1];
-    const userQuery = lastMessage?.content || "";
+    const userQuery = typeof lastMessage?.content === "string" ? lastMessage.content : (lastMessage?.content?.toString() || "");
 
     console.log(`🔍 RAG Retrieval for query: "${userQuery}"`);
 
