@@ -92,26 +92,39 @@ export class JokesVectorStore {
             k?: number;
             filter?: Record<string, any>;
             scoreThreshold?: number;
+            excludeJokes?: string[]; // Jokes to exclude from results
         } = {}
     ): Promise<Document[]> {
         if (!this.vectorStore) {
             throw new Error("Vector store not initialized. Call initialize() first.");
         }
 
-        const { k = 3, filter, scoreThreshold = 0.7 } = options;
+        const { k = 3, filter, scoreThreshold = 0.7, excludeJokes = [] } = options;
 
         console.log(`🔍 Searching for jokes related to: "${query}"`);
+        if (excludeJokes.length > 0) {
+            console.log(`🚫 Excluding ${excludeJokes.length} recent jokes from results`);
+        }
 
-        // Perform similarity search
+        // Perform similarity search with more results to account for exclusions
+        const searchK = Math.max(k * 2, 10); // Get more results to filter from
         const results = await this.vectorStore.similaritySearchWithScore(
             query,
-            k,
+            searchK,
             filter
         );
 
-        // Filter by score threshold
+        // Filter by score threshold and exclude recent jokes
         const filteredResults = results
             .filter(([_, score]) => score >= scoreThreshold)
+            .filter(([doc, _]) => {
+                // Check if this joke was recently shown
+                const isRecent = excludeJokes.some(recentJoke =>
+                    doc.pageContent.trim() === recentJoke.trim()
+                );
+                return !isRecent;
+            })
+            .slice(0, k) // Take only the requested number after filtering
             .map(([doc, score]) => {
                 console.log(`📊 Found joke (score: ${score.toFixed(3)}): ${doc.pageContent.substring(0, 50)}...`);
                 return doc;
@@ -123,36 +136,62 @@ export class JokesVectorStore {
     /**
      * Search jokes by category
      */
-    async searchByCategory(category: string, k: number = 2): Promise<Document[]> {
+    async searchByCategory(category: string, k: number = 2, excludeJokes: string[] = []): Promise<Document[]> {
         return this.searchJokes("", {
             k,
-            filter: { category }
+            filter: { category },
+            excludeJokes
         });
     }
 
     /**
      * Search jokes by difficulty
      */
-    async searchByDifficulty(difficulty: "easy" | "medium" | "hard", k: number = 2): Promise<Document[]> {
+    async searchByDifficulty(difficulty: "easy" | "medium" | "hard", k: number = 2, excludeJokes: string[] = []): Promise<Document[]> {
         return this.searchJokes("", {
             k,
-            filter: { difficulty }
+            filter: { difficulty },
+            excludeJokes
         });
     }
 
     /**
      * Get random jokes (fallback when no good matches)
      */
-    async getRandomJokes(k: number = 2): Promise<Document[]> {
+    async getRandomJokes(k: number = 2, excludeJokes: string[] = []): Promise<Document[]> {
         if (!this.vectorStore) {
             throw new Error("Vector store not initialized");
         }
 
-        // Get all documents and shuffle
-        const allDocs = this.jokesDatabase.map((joke: any) => new Document({
-            pageContent: joke.content,
-            metadata: joke.metadata
-        }));
+        console.log(`🎲 Getting ${k} random jokes`);
+        if (excludeJokes.length > 0) {
+            console.log(`🚫 Excluding ${excludeJokes.length} recent jokes from random selection`);
+        }
+
+        // Get all documents and filter out recent jokes
+        const allDocs = this.jokesDatabase
+            .filter((joke: any) => {
+                const isRecent = excludeJokes.some(recentJoke =>
+                    joke.content.trim() === recentJoke.trim()
+                );
+                return !isRecent;
+            })
+            .map((joke: any) => new Document({
+                pageContent: joke.content,
+                metadata: joke.metadata
+            }));
+
+        if (allDocs.length === 0) {
+            console.log("⚠️ No jokes available after excluding recent ones, returning original jokes");
+            // If all jokes are recent, return original jokes anyway
+            return this.jokesDatabase
+                .map((joke: any) => new Document({
+                    pageContent: joke.content,
+                    metadata: joke.metadata
+                }))
+                .sort(() => 0.5 - Math.random())
+                .slice(0, k);
+        }
 
         const shuffled = allDocs.sort(() => 0.5 - Math.random());
         return shuffled.slice(0, k);

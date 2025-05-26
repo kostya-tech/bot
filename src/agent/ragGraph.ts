@@ -26,29 +26,34 @@ async function retrieveContext(state: typeof StateAnnotation.State) {
 
     const lastMessage = state.messages[state.messages.length - 1];
     const userQuery = typeof lastMessage?.content === "string" ? lastMessage.content : (lastMessage?.content?.toString() || "");
+    const recentJokes = state.recentJokes || [];
 
     console.log(`🔍 RAG Retrieval for query: "${userQuery}"`);
+    if (recentJokes.length > 0) {
+        console.log(`🚫 [RAG DEBUG] Excluding ${recentJokes.length} recent jokes from search`);
+    }
 
     // Extract user preferences from conversation history
     const userPrefs = state.userPreferences || {};
 
     try {
-        // Perform semantic search
+        // Perform semantic search, excluding recent jokes
         console.log("🔍 [VECTOR DEBUG] Searching for jokes with query:", userQuery); let retrievedJokes = await vectorStore.searchJokes(userQuery, {
             k: 3,
-            scoreThreshold: 0.6
+            scoreThreshold: 0.6,
+            excludeJokes: recentJokes
         });
 
         // If no good matches, try category-based search
         if (retrievedJokes.length === 0 && userPrefs.preferredJokeCategory) {
             console.log(`🎯 Fallback to category search: ${userPrefs.preferredJokeCategory}`);
-            retrievedJokes = await vectorStore.searchByCategory(userPrefs.preferredJokeCategory, 2);
+            retrievedJokes = await vectorStore.searchByCategory(userPrefs.preferredJokeCategory, 2, recentJokes);
         }
 
         // Final fallback to random jokes
         if (retrievedJokes.length === 0) {
             console.log("🎲 Fallback to random jokes");
-            retrievedJokes = await vectorStore.getRandomJokes(2);
+            retrievedJokes = await vectorStore.getRandomJokes(2, recentJokes);
         }
 
         console.log(`✅ Retrieved ${retrievedJokes.length} jokes`);
@@ -147,6 +152,14 @@ async function generateResponse(state: typeof StateAnnotation.State) {
                         const jokeCategories = retrievedJokes.map(joke => joke.metadata.category);
                         const preferredCategory = jokeCategories[0]; // Most relevant
 
+                        // Add new jokes to recent jokes list (keep last 5)
+                        const currentRecentJokes = state.recentJokes || [];
+                        const newJokes = retrievedJokes.map(joke => joke.pageContent);
+                        const updatedRecentJokes = [...currentRecentJokes, ...newJokes]
+                            .slice(-5); // Keep only last 5 jokes
+
+                        console.log(`📝 [RECENT] Updated recent jokes list: ${updatedRecentJokes.length} jokes`);
+
                         return {
                             messages: [new AIMessage(response)],
                             jokesCount: (state.jokesCount || 0) + 1,
@@ -154,7 +167,8 @@ async function generateResponse(state: typeof StateAnnotation.State) {
                             userPreferences: {
                                 ...state.userPreferences,
                                 preferredJokeCategory: preferredCategory
-                            }
+                            },
+                            recentJokes: updatedRecentJokes
                         };
                     } else {
                         response = await llmService.generateNoJokesResponse(userName, userMessage);
@@ -184,7 +198,8 @@ async function generateResponse(state: typeof StateAnnotation.State) {
                 return {
                     messages: [new AIMessage(response)],
                     conversationStage: "greeting",
-                    jokesCount: 0
+                    jokesCount: 0,
+                    recentJokes: [] // Clear recent jokes for fresh start
                 };
 
             default:

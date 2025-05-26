@@ -98,4 +98,9 @@ export const StateAnnotation = Annotation.Root({
    * Conversation history for context
    */
   conversationHistory: Annotation<string[]>,
+
+  /**
+   * Recent jokes to avoid repetition (last 5 jokes)
+   */
+  recentJokes: Annotation<string[]>,
 });
