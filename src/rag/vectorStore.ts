@@ -47,12 +47,10 @@ function loadJokesFromFile(): any[] {
     }
 }
 
-// Load jokes database from external JSON file
-const JOKES_DATABASE = loadJokesFromFile();
-
 export class JokesVectorStore {
     private vectorStore: FaissStore | null = null;
     private embeddings: OpenAIEmbeddings;
+    private jokesDatabase: any[] = []; // Store jokes in class instance
 
     constructor() {
         this.embeddings = new OpenAIEmbeddings({
@@ -67,8 +65,11 @@ export class JokesVectorStore {
     async initialize(): Promise<void> {
         console.log("🔄 Initializing jokes vector store...");
 
+        // Load fresh jokes from file
+        this.jokesDatabase = loadJokesFromFile();
+
         // Convert jokes to documents
-        const documents = JOKES_DATABASE.map(joke => new Document({
+        const documents = this.jokesDatabase.map((joke: any) => new Document({
             pageContent: joke.content,
             metadata: joke.metadata
         }));
@@ -148,7 +149,7 @@ export class JokesVectorStore {
         }
 
         // Get all documents and shuffle
-        const allDocs = JOKES_DATABASE.map(joke => new Document({
+        const allDocs = this.jokesDatabase.map((joke: any) => new Document({
             pageContent: joke.content,
             metadata: joke.metadata
         }));
@@ -205,6 +206,6 @@ export class JokesVectorStore {
      * Get current jokes count
      */
     getJokesCount(): number {
-        return JOKES_DATABASE.length;
+        return this.jokesDatabase.length;
     }
 } 
