@@ -1,7 +1,7 @@
 {
-  "name": "rag-joke-bot",
+  "name": "ukrainian-joke-bot",
   "version": "1.0.0",
-  "description": "RAG-enhanced joke bot using LangGraph and OpenAI",
+  "description": "RAG-enhanced Ukrainian joke bot using LangGraph and OpenAI",
   "packageManager": "yarn@1.22.22",
   "main": "dist/agent/ragGraph.js",
   "author": "Your Name",
